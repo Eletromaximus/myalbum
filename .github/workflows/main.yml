@@ -29,5 +29,5 @@ jobs:
       - name: Install de dependencias
         run: npm install
       - name: Run linter!
-        run: yarn lint
+        run: npm run lint
       
