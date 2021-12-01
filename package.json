@@ -21,7 +21,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "commit": "react-scripts cz"
+    "commit": "cz",
+    "lint": "eslint --ignore-path .gitignore ."
   },
   "eslintConfig": {
     "extends": [
