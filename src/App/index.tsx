@@ -1,11 +1,13 @@
 /* eslint-disable camelcase */
-import React /*, { useState } */ from 'react'
+import React, { useState } from 'react'
 import { Grid } from '../components/foundation/layout/Grid'
 // import Photo from '../components/Photo'
-// import client from '../service/service'
+import client from '../service/service'
 
 import * as S from './style'
 import SearchIcon from '@material-ui/icons/Search'
+import { debounce } from 'lodash'
+import { ErrorResponse, PhotosWithTotalResults } from 'pexels'
 
 // interface IPhoto {
 //   id: number,
@@ -25,43 +27,66 @@ import SearchIcon from '@material-ui/icons/Search'
 //     portrait: string,
 //     landscape: string,
 //     tiny: string
-//     },
+//   },
 //   liked: boolean
+// }
+// interface IPhotos {
+//   total_results: number,
+//   page: number,
+//   per_page: number,
+//   photos: IPhoto,
+//   next_page: string
 // }
 
 function App () {
-  // const [photo, setPhoto] = useState<IPhoto | undefined>()
+  const [photos, setPhotos] = useState<PhotosWithTotalResults>()
+  const [search, setSearch] = useState<string>('')
 
-  // function apiPhotos () {
-  //   client.photos.show({ id: 3764579 })
-  //     .then((img: any) => {
-  //       setPhoto(img)
-  //     })
-  //     .catch((err: Error) => {
-  //       console.log(err.message)
-  //     })
-  // }
+  async function apiPhotos () {
+    await client.photos.search({
+      query: search
+    })
+      .then((result: any) => {
+        setPhotos(result)
+      })
+      .catch((err: ErrorResponse) => {
+        console.log(err)
+      })
+  }
 
-  function handleKeyPress (e: any) {
-    e.preventDefault()
-    if (e.key === 'Enter') {
-      e.target.value = ''
-    }
+  function handleClick () {
+    apiPhotos()
+  }
+
+  const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value)
   }
 
   return (
-    <Grid.Container
-      className='App'
-    >
-      <S.Header>
-        My Album
-      </S.Header>
-      <S.Input >
-        <SearchIcon />
-        <input type="text" onKeyUp={(e: any) => handleKeyPress(e)} />
-      </S.Input>
-      {/* {photo?.src && <Photo url={photo?.src.medium}/>} */}
-    </Grid.Container>
+    <>
+      <Grid.Container
+        className='App'
+      >
+        <S.Header>
+          My Album
+        </S.Header>
+        <S.Input >
+          <SearchIcon />
+          <input type="text" onChange={debounce(changeHandler, 500)} />
+        </S.Input>
+          <button onClick={() => handleClick()} > Confirme </button>
+      </Grid.Container>
+
+        <Grid.Row>
+          <S.Ul>{
+            photos && photos.photos.map((photo: any) => (
+              <li key={photo.id} >
+                <img src={photo.src.medium} />
+              </li>
+            ))}
+          </S.Ul>
+        </Grid.Row>
+    </>
   )
 }
 

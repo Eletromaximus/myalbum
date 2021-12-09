@@ -29,3 +29,20 @@ export const Input = styled.div`
     border-radius: 10px;
   }
 `
+export const Ul = styled.ul`
+  display: flex;
+  margin-right: 10px;
+  padding: 0;
+  overflow-x: scroll;
+  /* scroll-snap-type: x mandatory; */
+
+  li{
+    list-style: none;
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+`
+/*
+      img {
+        outline: none
+      } */
