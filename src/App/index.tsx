@@ -1,46 +1,40 @@
 /* eslint-disable camelcase */
 import React, { useState } from 'react'
 import { Grid } from '../components/foundation/layout/Grid'
-// import Photo from '../components/Photo'
 import client from '../service/service'
+import PhotoList from '../components/PhotoList'
 
 import * as S from './style'
 import SearchIcon from '@material-ui/icons/Search'
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward'
+import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { debounce } from 'lodash'
-import { ErrorResponse, PhotosWithTotalResults } from 'pexels'
-
-// interface IPhoto {
-//   id: number,
-//   width: number,
-//   height: number,
-//   url: string,
-//   photographer: string,
-//   photographer_url: string,
-//   photographer_id: number,
-//   avg_color: string,
-//   src: {
-//     original: string,
-//     large2x: string,
-//     large: string,
-//     medium: string,
-//     small: string,
-//     portrait: string,
-//     landscape: string,
-//     tiny: string
-//   },
-//   liked: boolean
-// }
-// interface IPhotos {
-//   total_results: number,
-//   page: number,
-//   per_page: number,
-//   photos: IPhoto,
-//   next_page: string
-// }
+import { ErrorResponse, PhotosWithTotalResults, Photo } from 'pexels'
 
 function App () {
   const [photos, setPhotos] = useState<PhotosWithTotalResults>()
   const [search, setSearch] = useState<string>('')
+  const [scrollX, setScrollX] = useState<number>(0)
+
+  function handleArrowRight () {
+    const listw = (photos?.total_results as number) * 15
+    let x = scrollX - Math.round(window.innerWidth / 2)
+    if (listw > -x) {
+      x -= 150
+      setScrollX(x)
+    }
+    console.log(-listw, x)
+  }
+
+  function handleArrowLeft () {
+    let x = scrollX + Math.round(window.innerWidth / 2)
+    console.log(scrollX)
+    if (x > 0) {
+      x = 0
+    }
+
+    setScrollX(x)
+  }
 
   async function apiPhotos () {
     await client.photos.search({
@@ -64,27 +58,36 @@ function App () {
 
   return (
     <>
-      <Grid.Container
-        className='App'
-      >
+      <Grid.Container>
         <S.Header>
           My Album
         </S.Header>
+
         <S.Input >
           <SearchIcon />
           <input type="text" onChange={debounce(changeHandler, 500)} />
         </S.Input>
+
           <button onClick={() => handleClick()} > Confirme </button>
       </Grid.Container>
 
-        <Grid.Row>
-          <S.Ul>{
-            photos && photos.photos.map((photo: any) => (
-              <li key={photo.id} >
-                <img src={photo.src.medium} />
-              </li>
-            ))}
-          </S.Ul>
+        <Grid.Row
+          id='ListPhotos'
+          marginLeft={scrollX}
+        >
+          <S.ArrowRight
+            onClick={() => handleArrowRight()}
+          >
+            <ArrowForwardIcon style={{ fontSize: 50 }} />
+          </S.ArrowRight>
+
+          <S.ArrowLeft
+            onClick={() => handleArrowLeft()}
+          >
+            <ArrowBackIcon style={{ fontSize: 50 }} />
+          </S.ArrowLeft>
+
+          {photos && <PhotoList photos={photos.photos as Photo[]} />}
         </Grid.Row>
     </>
   )

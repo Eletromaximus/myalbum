@@ -29,20 +29,29 @@ export const Input = styled.div`
     border-radius: 10px;
   }
 `
-export const Ul = styled.ul`
+const Arrow = styled.div` 
   display: flex;
-  margin-right: 10px;
-  padding: 0;
-  overflow-x: scroll;
-  /* scroll-snap-type: x mandatory; */
+  flex-direction: column;
+  position: absolute;
+  z-index: 99;
+  width: 50px;
+  height: 350px;
+  background-color: rgba(255, 255, 255, 0.8);
+  align-items: center;
+  justify-content: center;
+  /* overflow: hidden; */
+  cursor: pointer;
+  opacity: 0;
+  transition: all ease 0.5s;
+  
 
-  li{
-    list-style: none;
-    overflow: hidden;
-    scroll-snap-align: start;
+  &:hover {
+    opacity: 1;
   }
 `
-/*
-      img {
-        outline: none
-      } */
+export const ArrowRight = styled(Arrow)`
+  left: 0;
+`
+export const ArrowLeft = styled(Arrow)`
+  right: 0
+`

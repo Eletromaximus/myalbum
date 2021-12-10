@@ -10,10 +10,10 @@ interface IProps {
   flexDirection?: string | object;
   alignItems?: string | object;
   justifyContent?: string | object;
-  marginLeft?: string | object;
+  marginLeft?: string | object | number;
   marginRight?: string | object;
   marginTop?: string | object;
-  marginBottom?: string | object;
+  width?: string | object;
   paddingRight?: string | object;
   paddingLeft?: string | object;
 }
@@ -61,6 +61,6 @@ export const Grid = {
     ${propToStyle('marginRight')}
     ${propToStyle('justifyContent')}
     ${propToStyle('marginTop')}
-    ${propToStyle('marginBottom')}
+    ${propToStyle('width')}
   `
 }
