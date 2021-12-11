@@ -3,10 +3,11 @@ import { Ul } from './styles'
 import { Photo } from 'pexels'
 
 interface IPhoto {
-  photos: Photo[]
+  photos: Photo[],
+  children: React.ReactChild
 }
 
-export default function PhotoList ({ photos } : IPhoto) {
+export default function PhotoList ({ photos, children } : IPhoto) {
   return (
     <Ul>{
       photos && photos.map((photo: any) => (
@@ -14,6 +15,7 @@ export default function PhotoList ({ photos } : IPhoto) {
           <img src={photo.src.medium} />
         </li>
       ))}
+      {children}
     </Ul>
   )
 }

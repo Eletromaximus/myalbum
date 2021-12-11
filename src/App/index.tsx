@@ -1,44 +1,38 @@
 /* eslint-disable camelcase */
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Grid } from '../components/foundation/layout/Grid'
 import client from '../service/service'
 import PhotoList from '../components/PhotoList'
 
 import * as S from './style'
 import SearchIcon from '@material-ui/icons/Search'
-import ArrowForwardIcon from '@material-ui/icons/ArrowForward'
-import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { debounce } from 'lodash'
 import { ErrorResponse, PhotosWithTotalResults, Photo } from 'pexels'
 
 function App () {
   const [photos, setPhotos] = useState<PhotosWithTotalResults>()
   const [search, setSearch] = useState<string>('')
-  const [scrollX, setScrollX] = useState<number>(0)
+  const [page, setPage] = useState<number>(1)
+  const [scrollRadio, setScrollRadio] = useState<number>()
+  const observer = useRef()
 
-  function handleArrowRight () {
-    const listw = (photos?.total_results as number) * 15
-    let x = scrollX - Math.round(window.innerWidth / 2)
-    if (listw > -x) {
-      x -= 150
-      setScrollX(x)
-    }
-    console.log(-listw, x)
-  }
+  const intersectionObserver = new IntersectionObserver((entries) => {
+    const radio = entries[0].intersectionRatio
+    setScrollRadio(radio)
+    setPage(page + 1)
+  })
 
-  function handleArrowLeft () {
-    let x = scrollX + Math.round(window.innerWidth / 2)
-    console.log(scrollX)
-    if (x > 0) {
-      x = 0
-    }
-
-    setScrollX(x)
-  }
+  useEffect(() => {
+    // const watcher = document.querySelector('#watcher')
+    intersectionObserver.observe(document.querySelector('#watcher') as Element)
+    console.log(observer.current, scrollRadio)
+    return () => intersectionObserver.disconnect()
+  }, [])
 
   async function apiPhotos () {
     await client.photos.search({
-      query: search
+      query: search,
+      page: page
     })
       .then((result: any) => {
         setPhotos(result)
@@ -61,8 +55,8 @@ function App () {
       <Grid.Container>
         <S.Header>
           My Album
+        {scrollRadio}
         </S.Header>
-
         <S.Input >
           <SearchIcon />
           <input type="text" onChange={debounce(changeHandler, 500)} />
@@ -74,20 +68,21 @@ function App () {
         <Grid.Row
           id='ListPhotos'
           marginLeft={scrollX}
+
         >
-          <S.ArrowRight
-            onClick={() => handleArrowRight()}
-          >
-            <ArrowForwardIcon style={{ fontSize: 50 }} />
-          </S.ArrowRight>
-
-          <S.ArrowLeft
-            onClick={() => handleArrowLeft()}
-          >
-            <ArrowBackIcon style={{ fontSize: 50 }} />
-          </S.ArrowLeft>
-
-          {photos && <PhotoList photos={photos.photos as Photo[]} />}
+          {photos && <PhotoList
+            photos={photos.photos as Photo[]
+          }>
+            <li>
+              <div
+                id='watcher'
+                ref={observer.current}
+                style={{
+                  width: '25px',
+                  height: '350px'
+                }}/>
+            </li>
+          </PhotoList>}
         </Grid.Row>
     </>
   )
