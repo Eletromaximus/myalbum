@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Grid } from '../components/foundation/layout/Grid'
 import client from '../service/service'
 import PhotoList from '../components/PhotoList'
@@ -7,39 +7,44 @@ import PhotoList from '../components/PhotoList'
 import * as S from './style'
 import SearchIcon from '@material-ui/icons/Search'
 import { debounce } from 'lodash'
-import { ErrorResponse, PhotosWithTotalResults, Photo } from 'pexels'
+import { ErrorResponse, Photo } from 'pexels'
 
 function App () {
-  const [photos, setPhotos] = useState<PhotosWithTotalResults>()
+  const [photos, setPhotos] = useState<Photo[]>()
   const [search, setSearch] = useState<string>('')
-  const [page, setPage] = useState<number>(1)
-  const [scrollRadio, setScrollRadio] = useState<number>()
-  const observer = useRef()
+  const [page, setPage] = useState<number>(0)
 
   const intersectionObserver = new IntersectionObserver((entries) => {
-    const radio = entries[0].intersectionRatio
-    setScrollRadio(radio)
-    setPage(page + 1)
+    if (entries.some((entry) => entry.isIntersecting)) {
+      setPage((pageisState) => (pageisState + 1))
+      console.log(page)
+    }
   })
 
   useEffect(() => {
-    // const watcher = document.querySelector('#watcher')
+    apiPhotos()
+  }, [page])
+
+  useEffect(() => {
     intersectionObserver.observe(document.querySelector('#watcher') as Element)
-    console.log(observer.current, scrollRadio)
     return () => intersectionObserver.disconnect()
   }, [])
 
   async function apiPhotos () {
-    await client.photos.search({
-      query: search,
-      page: page
-    })
-      .then((result: any) => {
-        setPhotos(result)
+    console.log(search)
+    if (search) {
+      console.log('apiphotos')
+      await client.photos.search({
+        query: search,
+        page: page || 1
       })
-      .catch((err: ErrorResponse) => {
-        console.log(err)
-      })
+        .then((result: any) => {
+          setPhotos([...result.photos])
+        })
+        .catch((err: ErrorResponse) => {
+          console.log(err)
+        })
+    }
   }
 
   function handleClick () {
@@ -55,34 +60,35 @@ function App () {
       <Grid.Container>
         <S.Header>
           My Album
-        {scrollRadio}
         </S.Header>
         <S.Input >
           <SearchIcon />
           <input type="text" onChange={debounce(changeHandler, 500)} />
         </S.Input>
 
-          <button onClick={() => handleClick()} > Confirme </button>
+          <button onClick={
+            () => handleClick()
+          }>
+            Confirme
+          </button>
       </Grid.Container>
 
         <Grid.Row
           id='ListPhotos'
           marginLeft={scrollX}
-
         >
-          {photos && <PhotoList
-            photos={photos.photos as Photo[]
-          }>
+          <PhotoList
+            photos={photos}
+          >
             <li>
-              <div
+            <div
                 id='watcher'
-                ref={observer.current}
                 style={{
                   width: '25px',
                   height: '350px'
                 }}/>
             </li>
-          </PhotoList>}
+          </PhotoList>
         </Grid.Row>
     </>
   )
