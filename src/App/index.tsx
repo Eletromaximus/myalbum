@@ -10,7 +10,7 @@ import { debounce } from 'lodash'
 import { ErrorResponse, Photo } from 'pexels'
 
 function App () {
-  const [photos, setPhotos] = useState<Photo[]>()
+  const [photos, setPhotos] = useState<Photo[]>([])
   const [search, setSearch] = useState<string>('')
   const [page, setPage] = useState<number>(0)
 
@@ -36,10 +36,10 @@ function App () {
       console.log('apiphotos')
       await client.photos.search({
         query: search,
-        page: page || 1
+        page: page
       })
         .then((result: any) => {
-          setPhotos([...result.photos])
+          setPhotos((photos) => [...photos, ...result.photos])
         })
         .catch((err: ErrorResponse) => {
           console.log(err)
