@@ -13,11 +13,11 @@ function App () {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [search, setSearch] = useState<string>('')
   const [page, setPage] = useState<number>(0)
+  const [memory, setMemory] = useState('')
 
   const intersectionObserver = new IntersectionObserver((entries) => {
     if (entries.some((entry) => entry.isIntersecting)) {
       setPage((pageisState) => (pageisState + 1))
-      console.log(page)
     }
   })
 
@@ -31,15 +31,18 @@ function App () {
   }, [])
 
   async function apiPhotos () {
-    console.log(search)
     if (search) {
-      console.log('apiphotos')
+      const changeSearch = memory !== search
       await client.photos.search({
         query: search,
         page: page
       })
         .then((result: any) => {
-          setPhotos((photos) => [...photos, ...result.photos])
+          setPhotos(changeSearch
+            ? result.photos
+            : (photos) => [...photos, ...result.photos]
+          )
+          setMemory(search)
         })
         .catch((err: ErrorResponse) => {
           console.log(err)
@@ -48,7 +51,12 @@ function App () {
   }
 
   function handleClick () {
-    apiPhotos()
+    if (memory !== search) {
+      if (page > 1) {
+        setPage(1)
+      }
+      apiPhotos()
+    }
   }
 
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
